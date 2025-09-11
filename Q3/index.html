@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bracket Checker - Simple Version</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .result-box {
+            transition: all 0.3s ease;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    
+    <!-- Header -->
+    <div class="bg-white shadow-sm">
+        <div class="max-w-4xl mx-auto px-4 py-6">
+            <h1 class="text-3xl font-bold text-center text-gray-800">
+                🔗 Bracket Checker
+            </h1>
+            <p class="text-center text-gray-600 mt-2">
+                Check if your brackets are correct with * wildcards
+            </p>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="max-w-4xl mx-auto px-4 py-8">
+        
+        <!-- Rules Box -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4 text-gray-800">How it works:</h2>
+            <div class="space-y-2 text-gray-700">
+                <p>• Use brackets: <span class="bg-gray-200 px-2 py-1 rounded">( ) [ ] { }</span></p>
+                <p>• Use wildcard: <span class="bg-yellow-200 px-2 py-1 rounded">*</span> can be any bracket or nothing</p>
+                <p>• Brackets must be in correct order and balanced</p>
+                <p>• If ANY way to replace * makes it valid → Result is <span class="text-green-600 font-bold">TRUE</span></p>
+            </div>
+        </div>
+
+        <!-- Single Test -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4 text-gray-800">Test One String</h2>
+            <div class="flex gap-3 mb-4">
+                <input 
+                    type="text" 
+                    id="singleInput" 
+                    placeholder="Try: (*) or [*] or {*}*"
+                    class="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-lg focus:outline-none focus:border-blue-500"
+                >
+                <button 
+                    onclick="checkSingle()" 
+                    class="px-6 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium"
+                >
+                    Check
+                </button>
+            </div>
+            <div id="singleResult" class="hidden"></div>
+        </div>
+
+        <!-- Batch Test -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4 text-gray-800">Test Multiple Strings</h2>
+            <textarea 
+                id="batchInput" 
+                placeholder='["(*)", "(*)*", "((*)", "((*[]})", "((*})", "(*]*"]'
+                rows="3"
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg text-lg focus:outline-none focus:border-blue-500 mb-4"
+            ></textarea>
+            <div class="flex gap-3">
+                <button 
+                    onclick="loadExample()" 
+                    class="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg"
+                >
+                    Load Example
+                </button>
+                <button 
+                    onclick="checkBatch()" 
+                    class="px-6 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg font-medium"
+                >
+                    Check All
+                </button>
+            </div>
+            <div id="batchResult" class="hidden mt-4"></div>
+        </div>
+
+        <!-- Results Section -->
+        <div id="resultsSection" class="hidden bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-semibold mb-4 text-gray-800">Results</h2>
+            <div id="detailedResults"></div>
+        </div>
+
+    </div>
+
+    <script>
+        // Simple bracket validation with wildcards
+        function isValid(s) {
+            const openBrackets = ['(', '[', '{'];
+            const closeBrackets = [')', ']', '}'];
+            const pairs = { ')': '(', ']': '[', '}': '{' };
+            
+            function tryAllWays(str, index, stack) {
+                // If we reached the end, check if stack is empty (all brackets matched)
+                if (index === str.length) {
+                    return stack.length === 0;
+                }
+                
+                const char = str[index];
+                
+                if (char === '*') {
+                    // Try 1: * = nothing (skip it)
+                    if (tryAllWays(str, index + 1, [...stack])) {
+                        return true;
+                    }
+                    
+                    // Try 2: * = opening bracket
+                    for (let open of openBrackets) {
+                        const newStack = [...stack, open];
+                        if (tryAllWays(str, index + 1, newStack)) {
+                            return true;
+                        }
+                    }
+                    
+                    // Try 3: * = closing bracket
+                    for (let close of closeBrackets) {
+                        if (stack.length > 0 && stack[stack.length - 1] === pairs[close]) {
+                            const newStack = [...stack];
+                            newStack.pop();
+                            if (tryAllWays(str, index + 1, newStack)) {
+                                return true;
+                            }
+                        }
+                    }
+                    
+                    return false;
+                } else if (openBrackets.includes(char)) {
+                    // It's an opening bracket
+                    stack.push(char);
+                    return tryAllWays(str, index + 1, stack);
+                } else if (closeBrackets.includes(char)) {
+                    // It's a closing bracket
+                    if (stack.length === 0 || stack[stack.length - 1] !== pairs[char]) {
+                        return false; // Wrong order or no matching opening
+                    }
+                    stack.pop();
+                    return tryAllWays(str, index + 1, stack);
+                } else {
+                    // Invalid character
+                    return false;
+                }
+            }
+            
+            return tryAllWays(s, 0, []);
+        }
+
+        // Check single string
+        function checkSingle() {
+            const input = document.getElementById('singleInput').value.trim();
+            if (!input) {
+                alert('Please enter a string to check!');
+                return;
+            }
+
+            const result = isValid(input);
+            const resultDiv = document.getElementById('singleResult');
+            
+            resultDiv.innerHTML = `
+                <div class="result-box p-4 rounded-lg border-2 ${result ? 'bg-green-50 border-green-300' : 'bg-red-50 border-red-300'}">
+                    <div class="flex items-center gap-3">
+                        <div>
+                            <p class="text-lg font-semibold ${result ? 'text-green-700' : 'text-red-700'}">
+                                ${result ? 'VALID' : 'INVALID'}
+                            </p>
+                            <p class="text-gray-600">Input: "${input}"</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            resultDiv.classList.remove('hidden');
+        }
+
+        // Check multiple strings
+        function checkBatch() {
+            const input = document.getElementById('batchInput').value.trim();
+            if (!input) {
+                alert('Please enter strings to check!');
+                return;
+            }
+
+            try {
+                const strings = JSON.parse(input);
+                if (!Array.isArray(strings)) {
+                    throw new Error('Must be an array');
+                }
+
+                const results = strings.map(str => isValid(str));
+                
+                // Show JSON result
+                const resultDiv = document.getElementById('batchResult');
+                resultDiv.innerHTML = `
+                    <div class="bg-blue-50 border border-blue-300 rounded-lg p-4">
+                        <h3 class="font-semibold text-blue-700 mb-2">JSON Result:</h3>
+                        <div class="bg-blue-100 p-3 rounded font-mono text-lg">
+                            [${results.join(', ')}]
+                        </div>
+                    </div>
+                `;
+                resultDiv.classList.remove('hidden');
+
+                // Show detailed results
+                showDetailedResults(strings, results);
+
+            } catch (error) {
+                alert('Invalid format! Please use: ["string1", "string2", ...]');
+            }
+        }
+
+        // Show detailed results
+        function showDetailedResults(strings, results) {
+            const detailedDiv = document.getElementById('detailedResults');
+            const validCount = results.filter(r => r).length;
+            
+            let html = `
+                <div class="bg-gray-50 rounded-lg p-4 mb-4">
+                    <h3 class="font-semibold mb-2">Summary:</h3>
+                    <p>Valid: ${validCount} | Invalid: ${strings.length - validCount} | Total: ${strings.length}</p>
+                </div>
+                <div class="space-y-3">
+            `;
+
+            strings.forEach((str, index) => {
+                const isValidResult = results[index];
+                html += `
+                    <div class="flex items-center justify-between p-3 rounded-lg border ${isValidResult ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}">
+                        <span class="font-mono text-lg">"${str}"</span>
+                        <span class="flex items-center gap-2">
+                            <span class="font-semibold ${isValidResult ? 'text-green-700' : 'text-red-700'}">
+                                ${isValidResult ? 'VALID' : 'INVALID'}
+                            </span>
+                        </span>
+                    </div>
+                `;
+            });
+
+            html += '</div>';
+            detailedDiv.innerHTML = html;
+            
+            document.getElementById('resultsSection').classList.remove('hidden');
+            document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Load example data
+        function loadExample() {
+            document.getElementById('batchInput').value = '["(*)", "(*)*", "((*)", "((*[]})", "((*})", "(*]*"]';
+        }
+
+        // Add enter key support
+        document.getElementById('singleInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                checkSingle();
+            }
+        });
+    </script>
+</body>
+</html>
