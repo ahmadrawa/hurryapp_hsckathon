@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gilgamesh and Enkidu Battleground</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .code-text {
+            font-family: 'Courier New', monospace;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    
+    <!-- Header -->
+    <div class="bg-white shadow-sm">
+        <div class="max-w-4xl mx-auto px-4 py-6">
+            <h1 class="text-3xl font-bold text-center text-gray-800">
+                Gilgamesh and Enkidu Battleground
+            </h1>
+            <p class="text-center text-gray-600 mt-2">
+                Calculate battle positions and strategy
+            </p>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="max-w-4xl mx-auto px-4 py-8">
+        
+        <!-- Rules Box -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4 text-gray-800">How it works:</h2>
+            <div class="space-y-2 text-gray-700">
+                <p><strong>Input:</strong> Number of test cases, then coordinates for each battle</p>
+                <p><strong>Format:</strong> Each line contains battle positions (x1, y1, x2, y2, etc.)</p>
+                <p><strong>Output:</strong> Calculated results for each battle scenario</p>
+                <p><strong>Goal:</strong> Find optimal positions and calculate battle outcomes</p>
+            </div>
+        </div>
+
+        <!-- Example Box -->
+        <div class="bg-blue-50 rounded-lg p-4 mb-6">
+            <h3 class="font-semibold text-blue-800 mb-2">Example Input:</h3>
+            <div class="code-text bg-blue-100 p-3 rounded text-sm">
+3<br>
+1 1<br>
+2 3<br>
+1 2<br>
+4 4
+            </div>
+        </div>
+
+        <!-- Single Test -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4 text-gray-800">Test Single Battle</h2>
+            <div class="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Gilgamesh Position (x, y):</label>
+                    <div class="flex gap-2">
+                        <input 
+                            type="number" 
+                            id="g_x" 
+                            placeholder="X"
+                            class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                        >
+                        <input 
+                            type="number" 
+                            id="g_y" 
+                            placeholder="Y"
+                            class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                        >
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Enkidu Position (x, y):</label>
+                    <div class="flex gap-2">
+                        <input 
+                            type="number" 
+                            id="e_x" 
+                            placeholder="X"
+                            class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                        >
+                        <input 
+                            type="number" 
+                            id="e_y" 
+                            placeholder="Y"
+                            class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                        >
+                    </div>
+                </div>
+            </div>
+            <button 
+                onclick="calculateSingle()" 
+                class="w-full px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium text-lg"
+            >
+                Calculate Battle Result
+            </button>
+            <div id="singleResult" class="hidden mt-4"></div>
+        </div>
+
+        <!-- Batch Test -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4 text-gray-800">Test Multiple Battles</h2>
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Battle Data (paste your input):</label>
+                <textarea 
+                    id="batchInput" 
+                    placeholder="3
+1 1
+2 3
+1 2
+4 4"
+                    rows="6"
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 code-text"
+                ></textarea>
+            </div>
+            <div class="flex gap-3">
+                <button 
+                    onclick="loadExample()" 
+                    class="px-6 py-3 bg-gray-500 hover:bg-gray-600 text-white rounded-lg"
+                >
+                    Load Example
+                </button>
+                <button 
+                    onclick="calculateBatch()" 
+                    class="flex-1 px-6 py-3 bg-green-500 hover:bg-green-600 text-white rounded-lg font-medium"
+                >
+                    Calculate All Battles
+                </button>
+            </div>
+            <div id="batchResult" class="hidden mt-4"></div>
+        </div>
+
+    </div>
+
+    <script>
+        // Calculate battle outcome for single pair
+        function calculateBattleOutcome(gx, gy, ex, ey) {
+            // Simple battle calculation based on positions
+            // This is a simplified version - you can adjust the logic based on actual requirements
+            
+            // Calculate distance between warriors
+            const distance = Math.sqrt((gx - ex) ** 2 + (gy - ey) ** 2);
+            
+            // Calculate relative advantage based on position
+            const gilgameshAdvantage = gx + gy;
+            const enkiduAdvantage = ex + ey;
+            
+            // Determine battle result
+            let result = 0;
+            
+            if (distance < 2) {
+                // Close combat - higher sum wins
+                result = gilgameshAdvantage > enkiduAdvantage ? 1 : enkiduAdvantage > gilgameshAdvantage ? 2 : 0;
+            } else if (distance >= 2 && distance < 5) {
+                // Medium range - different calculation
+                result = (gx * gy) > (ex * ey) ? 1 : (ex * ey) > (gx * gy) ? 2 : 0;
+            } else {
+                // Long range - position advantage
+                result = Math.max(gx, gy) > Math.max(ex, ey) ? 1 : Math.max(ex, ey) > Math.max(gx, gy) ? 2 : 0;
+            }
+            
+            return {
+                result: result,
+                distance: Math.round(distance * 100) / 100,
+                gilgameshScore: gilgameshAdvantage,
+                enkiduScore: enkiduAdvantage
+            };
+        }
+
+        // Calculate single battle
+        function calculateSingle() {
+            const gx = parseInt(document.getElementById('g_x').value);
+            const gy = parseInt(document.getElementById('g_y').value);
+            const ex = parseInt(document.getElementById('e_x').value);
+            const ey = parseInt(document.getElementById('e_y').value);
+            
+            if (isNaN(gx) || isNaN(gy) || isNaN(ex) || isNaN(ey)) {
+                alert('Please enter all position coordinates!');
+                return;
+            }
+
+            const battle = calculateBattleOutcome(gx, gy, ex, ey);
+            const resultDiv = document.getElementById('singleResult');
+            
+            let winner = '';
+            let color = '';
+            
+            if (battle.result === 1) {
+                winner = 'Gilgamesh Wins!';
+                color = 'text-blue-700 bg-blue-50 border-blue-300';
+            } else if (battle.result === 2) {
+                winner = 'Enkidu Wins!';
+                color = 'text-red-700 bg-red-50 border-red-300';
+            } else {
+                winner = 'Draw!';
+                color = 'text-gray-700 bg-gray-50 border-gray-300';
+            }
+            
+            resultDiv.innerHTML = `
+                <div class="p-4 rounded-lg border-2 ${color}">
+                    <h3 class="text-xl font-bold mb-2">${winner}</h3>
+                    <div class="space-y-1 text-sm">
+                        <p><strong>Distance:</strong> ${battle.distance}</p>
+                        <p><strong>Gilgamesh Score:</strong> ${battle.gilgameshScore}</p>
+                        <p><strong>Enkidu Score:</strong> ${battle.enkiduScore}</p>
+                        <p><strong>Result:</strong> ${battle.result}</p>
+                    </div>
+                </div>
+            `;
+            resultDiv.classList.remove('hidden');
+        }
+
+        // Calculate batch battles
+        function calculateBatch() {
+            const input = document.getElementById('batchInput').value.trim();
+            if (!input) {
+                alert('Please enter battle data!');
+                return;
+            }
+
+            try {
+                const lines = input.split('\n').map(line => line.trim()).filter(line => line);
+                const numCases = parseInt(lines[0]);
+                
+                if (isNaN(numCases) || lines.length < numCases + 1) {
+                    throw new Error('Invalid input format');
+                }
+
+                const results = [];
+                
+                for (let i = 1; i <= numCases; i++) {
+                    const coords = lines[i].split(' ').map(x => parseInt(x));
+                    if (coords.length >= 4) {
+                        const battle = calculateBattleOutcome(coords[0], coords[1], coords[2], coords[3]);
+                        results.push(battle.result);
+                    }
+                }
+                
+                // Show results
+                const resultDiv = document.getElementById('batchResult');
+                resultDiv.innerHTML = `
+                    <div class="bg-green-50 border border-green-300 rounded-lg p-4 mb-4">
+                        <h3 class="font-semibold text-green-700 mb-2">Battle Results:</h3>
+                        <div class="bg-green-100 p-3 rounded code-text text-lg">
+                            ${results.join('<br>')}
+                        </div>
+                    </div>
+                    
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <h3 class="font-semibold mb-2">Summary:</h3>
+                        <p>Total Battles: ${results.length}</p>
+                        <p>Gilgamesh Wins: ${results.filter(r => r === 1).length}</p>
+                        <p>Enkidu Wins: ${results.filter(r => r === 2).length}</p>
+                        <p>Draws: ${results.filter(r => r === 0).length}</p>
+                    </div>
+                `;
+                resultDiv.classList.remove('hidden');
+
+            } catch (error) {
+                alert('Invalid input format! Please check your data.');
+            }
+        }
+
+        // Load example data
+        function loadExample() {
+            const exampleData = `3
+1 1 2 3
+1 2 4 4
+0 0 1 1`;
+            document.getElementById('batchInput').value = exampleData;
+        }
+    </script>
+</body>
+</html>
