@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cross-Log Correlation Attack Detector</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#5D5CDE',
+                        cyber: {
+                            dark: '#0A0A0F',
+                            medium: '#1A1A2E',
+                            light: '#16213E',
+                            accent: '#0F3460'
+                        },
+                        neon: {
+                            blue: '#00F5FF',
+                            green: '#39FF14',
+                            red: '#FF073A',
+                            yellow: '#FFFF00'
+                        }
+                    }
+                }
+            },
+            darkMode: 'class'
+        }
+    </script>
+    <style>
+        .cyber-grid {
+            background-image: 
+                linear-gradient(rgba(0, 245, 255, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 245, 255, 0.1) 1px, transparent 1px);
+            background-size: 20px 20px;
+            animation: grid-move 20s linear infinite;
+        }
+        
+        @keyframes grid-move {
+            0% { background-position: 0 0; }
+            100% { background-position: 20px 20px; }
+        }
+        
+        .neon-glow {
+            box-shadow: 0 0 10px currentColor, 0 0 20px currentColor, 0 0 30px currentColor;
+        }
+        
+        .pulse-ring {
+            animation: pulse-ring 2s infinite;
+        }
+        
+        @keyframes pulse-ring {
+            0% { transform: scale(0.8); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.3; }
+            100% { transform: scale(0.8); opacity: 1; }
+        }
+        
+        .suspicious-alert {
+            animation: suspicious-pulse 1.5s infinite;
+        }
+        
+        @keyframes suspicious-pulse {
+            0%, 100% { background-color: rgba(255, 7, 58, 0.1); }
+            50% { background-color: rgba(255, 7, 58, 0.3); }
+        }
+        
+        .timeline-item {
+            transition: all 0.3s ease;
+        }
+        
+        .timeline-item:hover {
+            transform: translateX(5px);
+        }
+        
+        .system-badge {
+            transition: all 0.2s ease;
+        }
+        
+        .system-badge:hover {
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-cyber-dark text-white overflow-x-hidden">
+    <!-- Cyber Grid Background -->
+    <div class="cyber-grid fixed inset-0 opacity-30"></div>
+    
+    <!-- Main Container -->
+    <div class="relative z-10 min-h-screen">
+        <!-- Header -->
+        <header class="border-b border-neon-blue/30 bg-cyber-medium/80 backdrop-blur-sm">
+            <div class="max-w-7xl mx-auto px-4 py-6">
+                <div class="text-center">
+                    <h1 class="text-4xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-neon-blue via-neon-green to-neon-yellow bg-clip-text text-transparent">
+                         Cross-Log Correlation Attack Detector
+                    </h1>
+                    <p class="text-xl text-gray-300 mb-6">
+                        Advanced Security Analytics for Lateral Movement & Privilege Escalation Detection
+                    </p>
+                    
+                    <!-- Detection Criteria -->
+                    <div class="bg-cyber-light/50 backdrop-blur-sm rounded-2xl p-6 border border-neon-blue/30">
+                        <h2 class="text-2xl font-semibold mb-4 text-neon-blue">Suspicious Session Criteria</h2>
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div class="flex items-center space-x-4">
+                                <div class="w-12 h-12 bg-neon-green/20 rounded-full flex items-center justify-center">
+                                    <span class="text-2xl">⚡</span>
+                                </div>
+                                <div class="text-left">
+                                    <h3 class="font-semibold text-neon-green">Rapid System Access</h3>
+                                    <p class="text-sm text-gray-300">Accesses ≥3 different systems within 1 minute</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-4">
+                                <div class="w-12 h-12 bg-neon-red/20 rounded-full flex items-center justify-center">
+                                </div>
+                                <div class="text-left">
+                                    <h3 class="font-semibold text-neon-red">Privilege Escalation</h3>
+                                    <p class="text-sm text-gray-300">Ends with 'admin-panel' or 'root-db' access</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="max-w-7xl mx-auto px-4 py-8">
+            <!-- Input Section -->
+            <div class="bg-cyber-light/50 backdrop-blur-sm rounded-2xl p-8 mb-8 border border-neon-blue/30">
+                <h3 class="text-2xl font-semibold mb-6 text-neon-blue">Log Data Input</h3>
+                
+                <div class="mb-6">
+                    <label class="block text-sm font-medium mb-3 text-gray-300">Security Log Entries (JSON Array)</label>
+                    <textarea 
+                        id="logInput" 
+                        placeholder='[{"session": "abc", "system": "web", "time": "10:00:01"}, {"session": "abc", "system": "api", "time": "10:00:20"}]' 
+                        rows="8" 
+                        class="w-full px-4 py-3 bg-cyber-dark/70 border border-neon-blue/50 rounded-lg text-white placeholder-gray-400 text-base focus:outline-none focus:border-neon-green focus:ring-2 focus:ring-neon-green/30 transition-all resize-none font-mono"
+                    ></textarea>
+                </div>
+
+                <div class="flex flex-wrap gap-3">
+                    <button 
+                        onclick="loadExample()" 
+                        class="px-6 py-3 bg-cyber-accent hover:bg-cyber-accent/80 text-neon-blue border border-neon-blue/50 rounded-lg font-medium transition-all hover:neon-glow"
+                    >
+                        Load Example Data
+                    </button>
+                    <button 
+                        onclick="analyzeLogs()" 
+                        class="px-8 py-3 bg-gradient-to-r from-neon-red/20 to-neon-yellow/20 hover:from-neon-red/30 hover:to-neon-yellow/30 text-white border border-neon-red/50 rounded-lg font-medium transition-all hover:neon-glow"
+                    >
+                        Analyze Attack Patterns
+                    </button>
+                    <button 
+                        onclick="clearAll()" 
+                        class="px-6 py-3 bg-gray-600/50 hover:bg-gray-500/50 text-gray-300 border border-gray-500/50 rounded-lg font-medium transition-all"
+                    >
+                        Clear All
+                    </button>
+                </div>
+            </div>
+
+            <!-- Results Section -->
+            <div id="resultsSection" class="hidden">
+                <!-- Threat Level Alert -->
+                <div id="threatAlert" class="mb-6"></div>
+                
+                <!-- Suspicious Sessions -->
+                <div id="suspiciousResults" class="mb-8"></div>
+                
+                <!-- Session Timeline Analysis -->
+                <div id="timelineAnalysis" class="mb-8"></div>
+                
+                <!-- Detailed Session Breakdown -->
+                <div id="sessionBreakdown"></div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Dark mode detection
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.classList.add('dark');
+        }
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+            if (event.matches) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        });
+
+        // Convert time string to minutes for comparison
+        function timeToMinutes(timeStr) {
+            const [hours, minutes, seconds] = timeStr.split(':').map(Number);
+            return hours * 60 + minutes + seconds / 60;
+        }
+
+        // Main analysis function
+        function detectSuspiciousSessions(logs) {
+            const sessionMap = new Map();
+            
+            // Group logs by session
+            logs.forEach(log => {
+                if (!sessionMap.has(log.session)) {
+                    sessionMap.set(log.session, []);
+                }
+                sessionMap.get(log.session).push(log);
+            });
+
+            const suspiciousSessions = [];
+            const analysisDetails = [];
+
+            // Analyze each session
+            sessionMap.forEach((sessionLogs, sessionId) => {
+                // Sort by time
+                sessionLogs.sort((a, b) => timeToMinutes(a.time) - timeToMinutes(b.time));
+                
+                const analysis = {
+                    sessionId,
+                    logs: sessionLogs,
+                    uniqueSystems: [...new Set(sessionLogs.map(log => log.system))],
+                    isSuspicious: false,
+                    reasons: [],
+                    timeSpan: 0,
+                    hasPrivilegedAccess: false
+                };
+
+                // Check criteria
+                const firstTime = timeToMinutes(sessionLogs[0].time);
+                const lastTime = timeToMinutes(sessionLogs[sessionLogs.length - 1].time);
+                analysis.timeSpan = (lastTime - firstTime) * 60; // Convert to seconds
+
+                // Criterion 1: At least 3 different systems within 1 minute
+                const rapidAccess = analysis.uniqueSystems.length >= 3 && analysis.timeSpan <= 60;
+                
+                // Criterion 2: Ends with admin-panel or root-db
+                const lastSystem = sessionLogs[sessionLogs.length - 1].system;
+                const privilegedAccess = lastSystem === 'admin-panel' || lastSystem === 'root-db';
+                analysis.hasPrivilegedAccess = privilegedAccess;
+
+                if (rapidAccess) {
+                    analysis.reasons.push(`Rapid access: ${analysis.uniqueSystems.length} systems in ${Math.round(analysis.timeSpan)}s`);
+                }
+                
+                if (privilegedAccess) {
+                    analysis.reasons.push(`Privilege escalation: Accessed ${lastSystem}`);
+                }
+
+                // Session is suspicious if it meets BOTH criteria
+                if (rapidAccess && privilegedAccess) {
+                    analysis.isSuspicious = true;
+                    suspiciousSessions.push(sessionId);
+                }
+
+                analysisDetails.push(analysis);
+            });
+
+            return {
+                suspiciousSessions,
+                analysisDetails,
+                totalSessions: sessionMap.size,
+                totalLogs: logs.length
+            };
+        }
+
+        // Analyze logs function
+        function analyzeLogs() {
+            const input = document.getElementById('logInput').value.trim();
+            if (!input) {
+                showCustomAlert('Please enter log data to analyze.', 'warning');
+                return;
+            }
+
+            try {
+                const logs = JSON.parse(input);
+                if (!Array.isArray(logs)) {
+                    throw new Error('Input must be an array of log entries');
+                }
+
+                // Validate log structure
+                logs.forEach((log, index) => {
+                    if (!log.session || !log.system || !log.time) {
+                        throw new Error(`Log entry ${index + 1} is missing required fields (session, system, time)`);
+                    }
+                });
+
+                const results = detectSuspiciousSessions(logs);
+                displayResults(results);
+
+            } catch (error) {
+                showCustomAlert('Invalid log format: ' + error.message, 'error');
+            }
+        }
+
+        // Display comprehensive results
+        function displayResults(results) {
+            const { suspiciousSessions, analysisDetails, totalSessions, totalLogs } = results;
+            
+            // Show threat level alert
+            displayThreatAlert(suspiciousSessions.length, totalSessions);
+            
+            // Show suspicious sessions summary
+            displaySuspiciousResults(suspiciousSessions, analysisDetails);
+            
+            // Show timeline analysis
+            displayTimelineAnalysis(analysisDetails);
+            
+            // Show detailed breakdown
+            displaySessionBreakdown(analysisDetails);
+            
+            // Show results section
+            document.getElementById('resultsSection').classList.remove('hidden');
+            document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        // Display threat level alert
+        function displayThreatAlert(suspiciousCount, totalSessions) {
+            const alertContainer = document.getElementById('threatAlert');
+            const threatLevel = suspiciousCount === 0 ? 'LOW' : suspiciousCount <= 2 ? 'MEDIUM' : 'HIGH';
+            const threatColor = threatLevel === 'LOW' ? 'neon-green' : threatLevel === 'MEDIUM' ? 'neon-yellow' : 'neon-red';
+            const bgClass = suspiciousCount > 0 ? 'suspicious-alert' : 'bg-neon-green/10';
+
+            alertContainer.innerHTML = `
+                <div class="bg-cyber-light/70 backdrop-blur-sm rounded-2xl p-6 border border-${threatColor}/50 ${bgClass}">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-16 h-16 bg-${threatColor}/20 rounded-full flex items-center justify-center pulse-ring">
+                                <span class="text-3xl">${threatLevel === 'LOW' ? '' : threatLevel === 'MEDIUM' ? '' : ''}</span>
+                            </div>
+                            <div>
+                                <h3 class="text-2xl font-bold text-${threatColor}">THREAT LEVEL: ${threatLevel}</h3>
+                                <p class="text-gray-300">
+                                    ${suspiciousCount} suspicious session${suspiciousCount !== 1 ? 's' : ''} detected out of ${totalSessions} total sessions
+                                </p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-4xl font-bold text-${threatColor}">${suspiciousCount}</div>
+                            <div class="text-sm text-gray-400">THREATS</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Display suspicious sessions results
+        function displaySuspiciousResults(suspiciousSessions, analysisDetails) {
+            const container = document.getElementById('suspiciousResults');
+            
+            container.innerHTML = `
+                <div class="bg-cyber-light/50 backdrop-blur-sm rounded-2xl p-8 border border-neon-red/30">
+                    <h3 class="text-2xl font-semibold mb-6 text-neon-red">Suspicious Sessions Detected</h3>
+                    
+                    <div class="mb-6">
+                        <h4 class="text-lg font-semibold mb-3 text-gray-300">JSON Output:</h4>
+                        <div class="bg-cyber-dark/70 rounded-lg p-4 border border-neon-blue/30">
+                            <code class="text-neon-green font-mono text-lg">
+                                [${suspiciousSessions.map(s => `"${s}"`).join(', ')}]
+                            </code>
+                        </div>
+                    </div>
+
+                    ${suspiciousSessions.length === 0 ? `
+                        <div class="text-center py-8">
+                            <h4 class="text-xl font-semibold text-neon-green mt-4">No Threats Detected</h4>
+                            <p class="text-gray-400">All sessions appear to be within normal parameters</p>
+                        </div>
+                    ` : `
+                        <div class="grid gap-4">
+                            ${suspiciousSessions.map(sessionId => {
+                                const details = analysisDetails.find(a => a.sessionId === sessionId);
+                                return `
+                                    <div class="bg-neon-red/10 border border-neon-red/30 rounded-lg p-4">
+                                        <div class="flex items-center justify-between mb-3">
+                                            <h5 class="text-lg font-semibold text-neon-red">Session: ${sessionId}</h5>
+                                            <span class="px-3 py-1 bg-neon-red/20 text-neon-red rounded-full text-sm font-medium">
+                                                SUSPICIOUS
+                                            </span>
+                                        </div>
+                                        <div class="space-y-2">
+                                            ${details.reasons.map(reason => `
+                                                <div class="flex items-center space-x-2 text-sm">
+                                                    <span class="text-neon-red">•</span>
+                                                    <span class="text-gray-300">${reason}</span>
+                                                </div>
+                                            `).join('')}
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    `}
+                </div>
+            `;
+        }
+
+        // Display timeline analysis
+        function displayTimelineAnalysis(analysisDetails) {
+            const container = document.getElementById('timelineAnalysis');
+            
+            container.innerHTML = `
+                <div class="bg-cyber-light/50 backdrop-blur-sm rounded-2xl p-8 border border-neon-blue/30">
+                    <h3 class="text-2xl font-semibold mb-6 text-neon-blue">Session Timeline Analysis</h3>
+                    
+                    <div class="space-y-6">
+                        ${analysisDetails.map(analysis => `
+                            <div class="border border-gray-600/50 rounded-lg p-4 ${analysis.isSuspicious ? 'bg-neon-red/5 border-neon-red/30' : 'bg-cyber-dark/30'}">
+                                <div class="flex items-center justify-between mb-4">
+                                    <h4 class="text-lg font-semibold ${analysis.isSuspicious ? 'text-neon-red' : 'text-gray-300'}">
+                                        Session: ${analysis.sessionId}
+                                    </h4>
+                                    <div class="flex items-center space-x-3">
+                                        <span class="text-sm text-gray-400">
+                                            ${analysis.uniqueSystems.length} systems • ${Math.round(analysis.timeSpan)}s duration
+                                        </span>
+                                        ${analysis.isSuspicious ? 
+                                            '<span class="px-2 py-1 bg-neon-red/20 text-neon-red rounded text-xs">THREAT</span>' : 
+                                            '<span class="px-2 py-1 bg-neon-green/20 text-neon-green rounded text-xs">SAFE</span>'
+                                        }
+                                    </div>
+                                </div>
+                                
+                                <div class="space-y-2">
+                                    ${analysis.logs.map((log, index) => `
+                                        <div class="timeline-item flex items-center space-x-4 p-3 bg-cyber-dark/50 rounded-lg">
+                                            <div class="w-8 h-8 bg-neon-blue/20 rounded-full flex items-center justify-center text-sm font-medium">
+                                                ${index + 1}
+                                            </div>
+                                            <div class="flex-1">
+                                                <div class="flex items-center space-x-3">
+                                                    <span class="system-badge px-3 py-1 rounded-full text-sm font-medium ${
+                                                        log.system === 'admin-panel' || log.system === 'root-db' ? 
+                                                        'bg-neon-red/20 text-neon-red border border-neon-red/30' :
+                                                        'bg-neon-blue/20 text-neon-blue border border-neon-blue/30'
+                                                    }">
+                                                        ${log.system}
+                                                    </span>
+                                                    <span class="text-gray-400">at</span>
+                                                    <span class="font-mono text-neon-green">${log.time}</span>
+                                                    ${log.system === 'admin-panel' || log.system === 'root-db' ? 
+                                                        '<span class="text-neon-red text-sm">PRIVILEGED</span>' : ''
+                                                    }
+                                                </div>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Display session breakdown
+        function displaySessionBreakdown(analysisDetails) {
+            const container = document.getElementById('sessionBreakdown');
+            const systemTypes = [...new Set(analysisDetails.flatMap(a => a.uniqueSystems))];
+            
+            container.innerHTML = `
+                <div class="bg-cyber-light/50 backdrop-blur-sm rounded-2xl p-8 border border-neon-green/30">
+                    <h3 class="text-2xl font-semibold mb-6 text-neon-green">Security Analytics Summary</h3>
+                    
+                    <div class="grid md:grid-cols-3 gap-6 mb-8">
+                        <div class="bg-cyber-dark/50 rounded-lg p-4 text-center">
+                            <div class="text-3xl font-bold text-neon-blue">${analysisDetails.length}</div>
+                            <div class="text-sm text-gray-400">Total Sessions</div>
+                        </div>
+                        <div class="bg-cyber-dark/50 rounded-lg p-4 text-center">
+                            <div class="text-3xl font-bold text-neon-red">${analysisDetails.filter(a => a.isSuspicious).length}</div>
+                            <div class="text-sm text-gray-400">Suspicious Sessions</div>
+                        </div>
+                        <div class="bg-cyber-dark/50 rounded-lg p-4 text-center">
+                            <div class="text-3xl font-bold text-neon-yellow">${systemTypes.length}</div>
+                            <div class="text-sm text-gray-400">Unique Systems</div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-6">
+                        <h4 class="text-lg font-semibold mb-3 text-gray-300">System Access Patterns:</h4>
+                        <div class="flex flex-wrap gap-2">
+                            ${systemTypes.map(system => `
+                                <span class="px-3 py-1 rounded-full text-sm font-medium ${
+                                    system === 'admin-panel' || system === 'root-db' ? 
+                                    'bg-neon-red/20 text-neon-red border border-neon-red/30' :
+                                    'bg-neon-blue/20 text-neon-blue border border-neon-blue/30'
+                                }">
+                                    ${system}
+                                </span>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Load example data
+        function loadExample() {
+            const exampleData = `[
+  {"session": "abc", "system": "web", "time": "10:00:01"},
+  {"session": "abc", "system": "api", "time": "10:00:20"},
+  {"session": "abc", "system": "admin-panel", "time": "10:00:50"},
+  {"session": "xyz", "system": "web", "time": "11:00:00"},
+  {"session": "xyz", "system": "db", "time": "11:02:00"}
+]`;
+            document.getElementById('logInput').value = exampleData;
+        }
+
+        // Clear all data
+        function clearAll() {
+            document.getElementById('logInput').value = '';
+            document.getElementById('resultsSection').classList.add('hidden');
+        }
+
+        // Custom alert function
+        function showCustomAlert(message, type = 'info') {
+            const colors = {
+                info: 'neon-blue',
+                warning: 'neon-yellow',
+                error: 'neon-red',
+                success: 'neon-green'
+            };
+            
+            const icons = {
+                info: 'ℹ️',
+                warning: '⚠️',
+                error: '❌',
+                success: '✅'
+            };
+
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4';
+            modal.innerHTML = `
+                <div class="bg-cyber-light border border-${colors[type]}/50 rounded-lg shadow-lg max-w-md w-full p-6">
+                    <div class="flex items-center mb-4">
+                        <span class="text-2xl mr-3">${icons[type]}</span>
+                        <h3 class="text-lg font-semibold text-${colors[type]}">Alert</h3>
+                    </div>
+                    <p class="text-gray-300 mb-6">${message}</p>
+                    <div class="flex justify-end">
+                        <button class="px-6 py-2 bg-${colors[type]}/20 text-${colors[type]} hover:bg-${colors[type]}/30 rounded border border-${colors[type]}/50 transition-colors" onclick="this.closest('.fixed').remove()">
+                            OK
+                        </button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+    </script>
+</body>
+</html>
