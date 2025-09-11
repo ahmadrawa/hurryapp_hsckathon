@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Domain Filter Validator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .code-text {
+            font-family: 'Courier New', monospace;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    
+    <!-- Header -->
+    <div class="bg-white shadow-sm">
+        <div class="max-w-4xl mx-auto px-4 py-6">
+            <h1 class="text-3xl font-bold text-center text-gray-800">
+                Domain Filter Validator
+            </h1>
+            <p class="text-center text-gray-600 mt-2">
+                Check if your domain filter expressions are valid
+            </p>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="max-w-4xl mx-auto px-4 py-8">
+        
+        <!-- Rules Box -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4 text-gray-800">How it works:</h2>
+            <div class="space-y-2 text-gray-700">
+                <p><strong>Basic format:</strong> <span class="code-text bg-gray-100 px-2 py-1 rounded">field operator value</span></p>
+                <p><strong>Valid operators:</strong> <span class="code-text bg-gray-100 px-2 py-1 rounded">= != < > % notin</span></p>
+                <p><strong>Values:</strong> Numbers, "quoted strings", or [list, items]</p>
+                <p><strong>Logic:</strong> Use AND / OR to combine conditions</p>
+                <p><strong>Grouping:</strong> Use ( ) to group expressions</p>
+            </div>
+        </div>
+
+        <!-- Examples Box -->
+        <div class="bg-blue-50 rounded-lg p-4 mb-6">
+            <h3 class="font-semibold text-blue-800 mb-2">Valid Examples:</h3>
+            <div class="space-y-1 text-sm">
+                <p class="code-text">(status = "paid") AND (amount > 1000)</p>
+                <p class="code-text">(status in ["pending","paid"])</p>
+                <p class="code-text">amount != 500</p>
+            </div>
+        </div>
+
+        <!-- Single Test -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4 text-gray-800">Test Expression</h2>
+            <div class="mb-4">
+                <input 
+                    type="text" 
+                    id="singleInput" 
+                    placeholder='Try: (status = "paid") AND (amount > 1000)'
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg text-lg focus:outline-none focus:border-blue-500 code-text"
+                >
+            </div>
+            <button 
+                onclick="validateSingle()" 
+                class="w-full px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium text-lg"
+            >
+                Validate Expression
+            </button>
+            <div id="singleResult" class="hidden mt-4"></div>
+        </div>
+
+        <!-- Batch Test -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4 text-gray-800">Test Multiple Expressions</h2>
+            <textarea 
+                id="batchInput" 
+                placeholder='["(status = \"paid\") AND (amount > 1000)", "(status in [\"pending\",\"paid\"])", "(status == \"paid\")", "(amount >)"]'
+                rows="4"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg text-lg focus:outline-none focus:border-blue-500 code-text mb-4"
+            ></textarea>
+            <div class="flex gap-3">
+                <button 
+                    onclick="loadTestCases()" 
+                    class="px-6 py-3 bg-gray-500 hover:bg-gray-600 text-white rounded-lg"
+                >
+                    Load Test Cases
+                </button>
+                <button 
+                    onclick="validateBatch()" 
+                    class="flex-1 px-6 py-3 bg-green-500 hover:bg-green-600 text-white rounded-lg font-medium"
+                >
+                    Validate All
+                </button>
+            </div>
+            <div id="batchResult" class="hidden mt-4"></div>
+        </div>
+
+    </div>
+
+    <script>
+        // Domain filter validation function
+        function validateDomainFilter(expression) {
+            try {
+                // Remove extra spaces
+                expression = expression.trim();
+                
+                if (!expression) {
+                    return { valid: false, error: "Empty expression" };
+                }
+
+                // Check for basic syntax issues
+                if (!isValidSyntax(expression)) {
+                    return { valid: false, error: "Invalid syntax" };
+                }
+
+                // Parse and validate the expression
+                return parseExpression(expression);
+                
+            } catch (error) {
+                return { valid: false, error: error.message };
+            }
+        }
+
+        // Check basic syntax rules
+        function isValidSyntax(expr) {
+            // Check balanced parentheses
+            let count = 0;
+            for (let char of expr) {
+                if (char === '(') count++;
+                if (char === ')') count--;
+                if (count < 0) return false;
+            }
+            if (count !== 0) return false;
+
+            // Check for invalid operators
+            if (expr.includes('==') || expr.includes('===')) return false;
+
+            // Check for incomplete expressions (operator without value)
+            const incompletePatterns = [
+                /\s[=!<>%]\s*[\)\s]*$/,  // ends with operator
+                /\s[=!<>%]\s*AND/i,      // operator followed by AND
+                /\s[=!<>%]\s*OR/i        // operator followed by OR
+            ];
+            
+            for (let pattern of incompletePatterns) {
+                if (pattern.test(expr)) return false;
+            }
+
+            return true;
+        }
+
+        // Parse and validate expression
+        function parseExpression(expr) {
+            // Tokenize the expression
+            const tokens = tokenize(expr);
+            
+            // Validate tokens
+            return validateTokens(tokens);
+        }
+
+        // Simple tokenizer
+        function tokenize(expr) {
+            const tokens = [];
+            let current = '';
+            let inQuotes = false;
+            let inBrackets = false;
+            
+            for (let i = 0; i < expr.length; i++) {
+                const char = expr[i];
+                
+                if (char === '"') {
+                    inQuotes = !inQuotes;
+                    current += char;
+                } else if (char === '[') {
+                    inBrackets = true;
+                    current += char;
+                } else if (char === ']') {
+                    inBrackets = false;
+                    current += char;
+                } else if (!inQuotes && !inBrackets && (char === ' ' || char === '(' || char === ')')) {
+                    if (current.trim()) {
+                        tokens.push(current.trim());
+                        current = '';
+                    }
+                    if (char === '(' || char === ')') {
+                        tokens.push(char);
+                    }
+                } else {
+                    current += char;
+                }
+            }
+            
+            if (current.trim()) {
+                tokens.push(current.trim());
+            }
+            
+            return tokens;
+        }
+
+        // Validate tokens
+        function validateTokens(tokens) {
+            if (tokens.length === 0) {
+                return { valid: false, error: "No tokens found" };
+            }
+
+            // Check for valid operators
+            const validOperators = ['=', '!=', '<', '>', '%', 'notin', 'in'];
+            const logicalOperators = ['AND', 'OR'];
+            
+            for (let i = 0; i < tokens.length; i++) {
+                const token = tokens[i];
+                
+                // Check for invalid operators
+                if (token === '==' || token === '===') {
+                    return { valid: false, error: "Invalid operator: " + token };
+                }
+                
+                // Check for unquoted strings that should be quoted
+                if (token.includes('paid') || token.includes('pending')) {
+                    if (!token.startsWith('"') || !token.endsWith('"')) {
+                        if (!token.startsWith('[')) {
+                            return { valid: false, error: "String values must be quoted: " + token };
+                        }
+                    }
+                }
+                
+                // Check for malformed lists
+                if (token.startsWith('[') && !token.endsWith(']')) {
+                    return { valid: false, error: "Malformed list: " + token };
+                }
+                
+                // Check for empty lists
+                if (token === '[]') {
+                    return { valid: false, error: "Empty list not allowed" };
+                }
+            }
+
+            return { valid: true, error: null };
+        }
+
+        // Validate single expression
+        function validateSingle() {
+            const input = document.getElementById('singleInput').value.trim();
+            if (!input) {
+                alert('Please enter an expression to validate!');
+                return;
+            }
+
+            const result = validateDomainFilter(input);
+            const resultDiv = document.getElementById('singleResult');
+            
+            resultDiv.innerHTML = `
+                <div class="p-4 rounded-lg border-2 ${result.valid ? 'bg-green-50 border-green-300' : 'bg-red-50 border-red-300'}">
+                    <div class="flex items-start gap-3">
+                        <div class="flex-1">
+                            <p class="text-lg font-semibold ${result.valid ? 'text-green-700' : 'text-red-700'}">
+                                ${result.valid ? 'VALID' : 'INVALID'}
+                            </p>
+                            <p class="text-gray-600 code-text break-words">Expression: "${input}"</p>
+                            ${!result.valid ? `<p class="text-red-600 mt-2">Error: ${result.error}</p>` : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+            resultDiv.classList.remove('hidden');
+        }
+
+        // Validate batch expressions
+        function validateBatch() {
+            const input = document.getElementById('batchInput').value.trim();
+            if (!input) {
+                alert('Please enter expressions to validate!');
+                return;
+            }
+
+            try {
+                const expressions = JSON.parse(input);
+                if (!Array.isArray(expressions)) {
+                    throw new Error('Must be an array');
+                }
+
+                const results = expressions.map(expr => validateDomainFilter(expr));
+                const booleanResults = results.map(r => r.valid);
+                
+                // Show JSON result
+                const resultDiv = document.getElementById('batchResult');
+                resultDiv.innerHTML = `
+                    <div class="bg-blue-50 border border-blue-300 rounded-lg p-4 mb-4">
+                        <h3 class="font-semibold text-blue-700 mb-2">Boolean Result:</h3>
+                        <div class="bg-blue-100 p-3 rounded code-text text-lg">
+                            [${booleanResults.join(', ')}]
+                        </div>
+                    </div>
+                    
+                    <div class="bg-gray-50 rounded-lg p-4 mb-4">
+                        <h3 class="font-semibold mb-2">Summary:</h3>
+                        <p>Valid: ${booleanResults.filter(r => r).length} | Invalid: ${booleanResults.filter(r => !r).length} | Total: ${expressions.length}</p>
+                    </div>
+                    
+                    <div class="space-y-3">
+                        ${expressions.map((expr, index) => {
+                            const result = results[index];
+                            return `
+                                <div class="p-3 rounded-lg border ${result.valid ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}">
+                                    <div class="flex items-start gap-3">
+                                        <div class="flex-1">
+                                            <p class="code-text text-sm break-words">"${expr}"</p>
+                                            <p class="font-semibold ${result.valid ? 'text-green-700' : 'text-red-700'}">
+                                                ${result.valid ? 'VALID' : 'INVALID'}
+                                            </p>
+                                            ${!result.valid ? `<p class="text-red-600 text-sm mt-1">${result.error}</p>` : ''}
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                `;
+                resultDiv.classList.remove('hidden');
+
+            } catch (error) {
+                alert('Invalid format! Please use: ["expression1", "expression2", ...]');
+            }
+        }
+
+        // Load test cases
+        function loadTestCases() {
+            const testCases = [
+                '(status = "paid") AND (amount > 1000)',
+                '(status in ["pending","paid"])',
+                '(status == "paid")',
+                '(amount >)'
+            ];
+            document.getElementById('batchInput').value = JSON.stringify(testCases, null, 2);
+        }
+
+        // Add enter key support
+        document.getElementById('singleInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                validateSingle();
+            }
+        });
+    </script>
+</body>
+</html>
