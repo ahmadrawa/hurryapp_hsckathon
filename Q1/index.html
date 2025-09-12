@@ -80,7 +80,7 @@
         <header class="text-center py-12 px-4">
             <div class="max-w-4xl mx-auto">
                 <h1 class="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
-                    🔐 Secure Password Policy Compliance Checker
+                    Secure Password Policy Compliance Checker
                 </h1>
                 <p class="text-xl text-gray-300 mb-8">
                     Enterprise-grade password validation for maximum security
@@ -97,15 +97,9 @@
                             <span>Minimum 12 characters</span>
                         </div>
                         <div class="flex items-center space-x-3">
-                            <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
-                                <span class="text-sm">🔤</span>
-                            </div>
                             <span>Upper, lower, digit, symbol</span>
                         </div>
                         <div class="flex items-center space-x-3">
-                            <div class="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center">
-                                <span class="text-sm">🚫</span>
-                            </div>
                             <span>No char repeated >2 times</span>
                         </div>
                     </div>
@@ -305,7 +299,6 @@
         // Display single password result
         function displaySingleResult(password, result) {
             const container = document.getElementById('resultsContainer');
-            const complianceIcon = result.isCompliant ? '✅' : '❌';
             const complianceColor = result.isCompliant ? 'text-green-400' : 'text-red-400';
             const complianceBg = result.isCompliant ? 'bg-green-500/20' : 'bg-red-500/20';
 
@@ -322,9 +315,6 @@
                     </div>
                     <div class="grid md:grid-cols-2 gap-3">
                         ${result.details.map(detail => `
-                            <div class="flex items-center space-x-3 p-3 bg-white/10 rounded-lg">
-                                <span class="text-lg">${detail.passed ? '✅' : '❌'}</span>
-                                <div>
                                     <div class="font-medium">${detail.rule}</div>
                                     <div class="text-sm text-gray-300">${detail.message}</div>
                                 </div>
@@ -389,7 +379,6 @@
                                 <div class="grid grid-cols-2 md:grid-cols-3 gap-2 text-sm">
                                     ${result.details.map(detail => `
                                         <div class="flex items-center space-x-2">
-                                            <span>${detail.passed ? '✅' : '❌'}</span>
                                             <span class="truncate">${detail.rule}</span>
                                         </div>
                                     `).join('')}
@@ -432,7 +421,6 @@
             modal.innerHTML = `
                 <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg max-w-md w-full p-6">
                     <div class="flex items-center mb-4">
-                        <span class="text-2xl mr-3">⚠️</span>
                         <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Notice</h3>
                     </div>
                     <p class="text-gray-700 dark:text-gray-300 mb-6">${message}</p>
@@ -454,4 +442,5 @@
         });
     </script>
 </body>
+
 </html>
