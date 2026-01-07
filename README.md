@@ -63,6 +63,38 @@ The workspace includes:
 
 For detailed information about Claude model configuration, see [.vscode/README.md](.vscode/README.md)
 
+---
+
+## الأسئلة الشائعة بالعربية (Arabic FAQ)
+
+### أين يتم حفظ ملفات الإعداد؟
+ملفات الإعداد **محفوظة بالفعل** في المجلد `.vscode/` ولا تحتاج لأي إجراء إضافي. الملفات هي:
+- `.vscode/settings.json` - إعدادات نماذج Claude
+- `.vscode/extensions.json` - الإضافات الموصى بها
+
+### هل إضافة Claude من GitHub؟
+**لا**، إضافة Claude هي من شركة **Anthropic** وليست من GitHub. 
+
+الفرق بين الإضافتين:
+- **GitHub Copilot** 🔵 - إضافة من GitHub (لديك اشتراك فيها بالفعل)
+- **Anthropic Claude** 🟣 - إضافة منفصلة من شركة Anthropic (تحتاج اشتراك منفصل)
+
+كلاهما يعملان بشكل مستقل في VS Code ولا يتداخلان.
+
+### كيف أستخدم Claude Opus؟
+1. افتح المشروع في VS Code
+2. ثبّت إضافة `Anthropic Claude` من متجر الإضافات
+3. احصل على مفتاح API من [console.anthropic.com](https://console.anthropic.com/)
+4. أضف المفتاح في إعدادات VS Code
+5. ابدأ الاستخدام - النموذج الافتراضي هو Claude 3 Opus
+
+### ملاحظة مهمة
+- اشتراك GitHub Copilot الخاص بك يعمل بشكل طبيعي ولا يتأثر
+- Claude يحتاج اشتراك منفصل من Anthropic
+- الإعدادات الموجودة في `.vscode/` تسهل استخدام Claude عند تثبيت الإضافة
+
+---
+
 ## 🐛 Troubleshooting
 
 **Claude Opus not showing up?**

@@ -27,14 +27,19 @@ This directory contains VS Code workspace settings that enable Claude Opus and o
 
 ## How to Use
 
+**Important Note**: This configuration is for the **Anthropic Claude** extension, which is separate from **GitHub Copilot**. Both can be used together in VS Code, but they require separate subscriptions and API keys.
+
 1. **Install Required Extensions**:
    - Open VS Code
    - Press `Ctrl+Shift+P` (or `Cmd+Shift+P` on Mac)
    - Type "Extensions: Show Recommended Extensions"
    - Install the recommended extensions
+   - **Claude Extension**: From Anthropic (requires Anthropic API key)
+   - **GitHub Copilot**: From GitHub (requires GitHub subscription - you may already have this)
 
 2. **Configure API Key**:
    - Get your API key from [Anthropic Console](https://console.anthropic.com/)
+   - This is separate from your GitHub Copilot subscription
    - Add it to your VS Code settings or environment variables
 
 3. **Select Model**:
