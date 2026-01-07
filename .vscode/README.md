@@ -43,8 +43,8 @@ This directory contains VS Code workspace settings that enable Claude Opus and o
 
 4. **Start Using**:
    - Open any file in your workspace
-   - Use the Claude extension commands from the command palette
-   - Or use GitHub Copilot with Claude models
+   - Use the Claude extension commands from the command palette (Ctrl+Shift+P / Cmd+Shift+P)
+   - GitHub Copilot is also available and works independently with its own models
 
 ## Configuration Files
 
