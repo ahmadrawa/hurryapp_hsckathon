@@ -1,0 +1,36 @@
+{
+  "github.copilot.enable": {
+    "*": true
+  },
+  "github.copilot.advanced": {
+    "model": "claude-opus-3"
+  },
+  "claude.models": [
+    {
+      "id": "claude-opus-3",
+      "name": "Claude 3 Opus",
+      "description": "Most powerful model for complex tasks",
+      "contextWindow": 200000,
+      "maxTokens": 4096
+    },
+    {
+      "id": "claude-sonnet-3.5",
+      "name": "Claude 3.5 Sonnet",
+      "description": "Balanced performance for most tasks",
+      "contextWindow": 200000,
+      "maxTokens": 4096
+    },
+    {
+      "id": "claude-haiku-3",
+      "name": "Claude 3 Haiku",
+      "description": "Fastest model for simple tasks",
+      "contextWindow": 200000,
+      "maxTokens": 4096
+    }
+  ],
+  "claude.defaultModel": "claude-opus-3",
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll": "explicit"
+  }
+}
