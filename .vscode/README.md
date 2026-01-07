@@ -38,7 +38,7 @@ This directory contains VS Code workspace settings that enable Claude Opus and o
    - Add it to your VS Code settings or environment variables
 
 3. **Select Model**:
-   - The default model is set to `claude-opus-3`
+   - The default model is set to `claude-3-opus-20240229` (Claude 3 Opus)
    - You can change it in `settings.json` by modifying the `claude.defaultModel` setting
 
 4. **Start Using**:
@@ -49,7 +49,12 @@ This directory contains VS Code workspace settings that enable Claude Opus and o
 ## Configuration Files
 
 - **settings.json**: Contains workspace-specific settings for Claude models
+  - Uses multiple configuration formats for compatibility with different Claude extensions
+  - `anthropic.*` settings for official Anthropic extensions
+  - `claude.*` settings for community Claude extensions
+  - Default model is set to Claude 3 Opus across all configurations
 - **extensions.json**: Lists recommended VS Code extensions for AI development
+- **README.md**: Detailed documentation on configuration and usage
 
 ## Troubleshooting
 

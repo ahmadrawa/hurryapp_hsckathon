@@ -2,6 +2,28 @@
   "github.copilot.enable": {
     "*": true
   },
+  "anthropic.defaultModel": "claude-3-opus-20240229",
+  "anthropic.models": {
+    "claude-3-opus-20240229": {
+      "name": "Claude 3 Opus",
+      "description": "Most powerful model for complex tasks",
+      "contextWindow": 200000,
+      "maxTokens": 4096
+    },
+    "claude-3-5-sonnet-20241022": {
+      "name": "Claude 3.5 Sonnet",
+      "description": "Balanced performance for most tasks",
+      "contextWindow": 200000,
+      "maxTokens": 4096
+    },
+    "claude-3-haiku-20240307": {
+      "name": "Claude 3 Haiku",
+      "description": "Fastest model for simple tasks",
+      "contextWindow": 200000,
+      "maxTokens": 4096
+    }
+  },
+  "claude.defaultModel": "claude-3-opus-20240229",
   "claude.models": [
     {
       "id": "claude-3-opus-20240229",
@@ -25,7 +47,6 @@
       "maxTokens": 4096
     }
   ],
-  "claude.defaultModel": "claude-3-opus-20240229",
   "editor.formatOnSave": true,
   "editor.codeActionsOnSave": {
     "source.fixAll": "explicit"
