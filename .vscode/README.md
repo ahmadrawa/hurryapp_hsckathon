@@ -5,21 +5,21 @@ This directory contains VS Code workspace settings that enable Claude Opus and o
 ## Available Claude Models
 
 ### Claude 3 Opus
-- **Model ID**: `claude-opus-3`
+- **Model ID**: `claude-3-opus-20240229`
 - **Description**: Most powerful model for complex tasks
 - **Context Window**: 200,000 tokens
 - **Max Output**: 4,096 tokens
 - **Best for**: Complex reasoning, advanced analysis, and challenging tasks
 
 ### Claude 3.5 Sonnet
-- **Model ID**: `claude-sonnet-3.5`
+- **Model ID**: `claude-3-5-sonnet-20241022`
 - **Description**: Balanced performance for most tasks
 - **Context Window**: 200,000 tokens
 - **Max Output**: 4,096 tokens
 - **Best for**: General-purpose tasks with good balance of speed and capability
 
 ### Claude 3 Haiku
-- **Model ID**: `claude-haiku-3`
+- **Model ID**: `claude-3-haiku-20240307`
 - **Description**: Fastest model for simple tasks
 - **Context Window**: 200,000 tokens
 - **Max Output**: 4,096 tokens
